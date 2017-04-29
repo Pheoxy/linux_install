@@ -1,0 +1,62 @@
+## Install ArchLinux using UEFI, NVIDIA and SSH for a Windows 10 Gaming KVM Enviroment
+
+
+# Requirements
+- Motherboard must be IOMMU Compatible and enabled
+- SSH Client
+
+Download Latest ArchLinux ISO
+https://www.archlinux.org/download/
+
+If using Windows use Rufus to image the archlinux.iso with DD Image.
+
+
+# Boot
+
+Boot from the Imaged USB in UEFI Mode and and before it can auto boot quickly use the Press the "E" to edit
+the boot sequence to allow for NVIDIA boot or we will get a black screen and won't be able to continue.
+
+Press the "END" key to get to the end of the line so we can add something to the boot sequence.
+
+Type:
+nomodeset
+
+After boot assuming no errors, type:
+passwd
+
+We have to give the "root" user a password so we can SSH into the install enviroment.
+
+After setting your password we now need to start the SSH service :
+sshd.service
+
+Type in and look for the "inet" entry that should corrospond with your LAN IP address's to find the IP Address of the Arch Install Computer:
+ip addr
+
+Use that IP address to SSH into the install enviroment and login with "root" and the password we set earlier.
+
+Now using your SSH console we need to check we booted with UEFI, type:
+ls /sys/firmware/efi/efivars
+
+
+## Install
+
+
+#Preperation
+
+First we need to check where connected to the internet.
+ping archlinux.org
+
+We also have to check the clock is set to your timezones time so update servers don't get confused.
+To update the time:
+timedatectl set-ntp true
+
+Set the timezone accordingly:
+timedatectl set-timezone Australia/Perth
+
+To check:
+timedatectl status
+
+
+# Partitioning
+
+We have to make sure the partion table is set to GPT.
