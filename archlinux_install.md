@@ -1,6 +1,5 @@
 # Install ArchLinux using UEFI, NVIDIA and SSH for a Windows 10 Gaming KVM Enviroment
 
-
 ###### Requirements
 - Motherboard must be IOMMU Compatible and enabled
 - SSH Client
@@ -38,8 +37,8 @@ Now using your SSH console we need to check we booted with UEFI, type:
 ls /sys/firmware/efi/efivars
 
 
-## Install
 
+## Install
 
 ###### Preperation
 
@@ -100,6 +99,7 @@ Now that the partitions have been created they need to be formatted to the appri
 mkfs.fat -F32 /dev/sda1
 mkfs.ext4 /dev/sda2
 mkfs.ext4 /dev/sda3
+
 
 ###### Mount the Partitions
 
@@ -165,6 +165,7 @@ type in underneath the "::1" line "127.0.1.1	pheoxy-desktop.localdomain	pheoxy-d
 "CTRL-O" then "ENTER" to save
 "CTRL-X" to exit nano editor
 
+
 ###### Setup Network Settings
 
 Find ethernet interface name:
@@ -183,15 +184,18 @@ Enable network services:
 systemctl enable systemd-networkd.service
 systemctl enable systemd-resolved.service
 
+
 ###### Rebuild Kernel for boot partition
 
 So that we have a stable kernel we use linux-lts:
 mkinitcpio -p linux-lts
 
+
 ###### root password
 
 Give "root" user a password for security and accidents:
 passwd
+
 
 ###### Add your user
 
@@ -207,11 +211,14 @@ uncomment "%wheel ALL=(ALL) ALL"
 "CTRL-O" then "ENTER" to save
 "CTRL-X" to exit nano editor
 
+
 ###### Install and enable SSHD Server on Installed System
+
 
 Install and enable it:
 pacman -Sy openssh
 systemctl enable sshd.service
+
 
 ###### Install Boot loader
 
@@ -251,6 +258,7 @@ editor   0
 Now we need to exit chroot:
 exit
 
+
 ###### Shutdown to boot into installed system
 
 First we need to turn off the PC:
@@ -259,6 +267,7 @@ poweroff
 Unplug Archlinux USB
 
 Power on your pc and watch boot.
+
 
 ###### Login and Final Install Edits
 
