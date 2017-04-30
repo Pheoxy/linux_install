@@ -19,11 +19,11 @@ Press the "END" key to get to the end of the line so we can add something to the
 
 Type:
 
-```nomodeset```
+`nomodeset`
 
 After boot assuming no errors, type:
 
-```passwd```
+`passwd`
 
 We have to give the "root" user a password so we can SSH into the install enviroment.
 
