@@ -18,7 +18,7 @@ the boot sequence to allow for NVIDIA boot or we will get a black screen and won
 Press the "END" key to get to the end of the line so we can add something to the boot sequence.
 
 Type:
-'nomodeset'
+`nomodeset`
 
 After boot assuming no errors, type:
 passwd
