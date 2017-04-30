@@ -240,7 +240,7 @@ Make a template, add intel-ucode for microcode updates, add root PARTUUID, add I
 title          Arch Linux
 linux          /vmlinuz-linux-lts
 initrd         /initramfs-linux-lts.img /intel-ucode.img
-options        root=PARTUUID=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXX rw intel_iommu=on
+options        root=PARTUUID=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXX rw quiet intel_iommu=on
 
 Edit boot entry for IOMMU:
 nano /boot/loader/entries/arch.conf
@@ -277,6 +277,8 @@ Login with the user you created with its password and then type:
 nano ~/.bashrc
 Edit
 PS1='\[\033[38;5;10m\]\u@\h\[$(tput sgr0)\]\[\033[38;5;15m\]:[\W]: \\$ \[$(tput sgr0)\]'
+"CTRL-O" then "ENTER" to save
+"CTRL-X" to exit nano editor
 
 Install screenfetch for fancy login information:
 sudo pacman -Sy screenfetch
@@ -287,6 +289,8 @@ Edit
 PS1='\[\033[38;5;10m\]\u@\h\[$(tput sgr0)\]\[\033[38;5;15m\]:[\W]: \\$ \[$(tput sgr0)\]'
 And add to the bottom
 if [ -f /usr/bin/screenfetch ]; then screenfetch; fi
+"CTRL-O" then "ENTER" to save
+"CTRL-X" to exit nano editor
 
 Install "htop for terminal process information:
 sudo pacman -S htop
@@ -326,5 +330,46 @@ yaourt gpmdp
 yaourt visual-studio-code
 yaourt gparted
 
+Some annoying kernel drivers:
+yaourt wd719x-firmware
+yaourt aic94xx-firmware
+
 
 ### KVM software install
+
+First we must find the PCI address's of our GPU:
+
+`lspci | grep VGA`
+
+01:00.0 VGA compatible controller: NVIDIA Corporation GM204 [GeForce GTX 970] (rev a1)
+04:00.0 VGA compatible controller: NVIDIA Corporation GK208 [GeForce GT 710B] (rev a1)
+
+`lspci -nn | grep 01:00.`
+
+01:00.0 VGA compatible controller [0300]: NVIDIA Corporation GM204 [GeForce GTX 970] [10de:13c2] (rev a1)
+01:00.1 Audio device [0403]: NVIDIA Corporation GM204 High Definition Audio Controller [10de:0fbb] (rev a1)
+
+Okay so now I know what address's my PCI Cards are we need to isolate the one we want to use for the Windows Guest:
+
+`sudo nano /etc/modprobe.d/vfio.conf`
+
+`options vfio-pci ids=10de:13c2,10de:0fbb`
+
+To make sure it does edit `sudo nano /etc/mkinitcpio.conf` and:
+
+`sudo nano /etc/mkinitcpio.conf`
+
+Add and check for `modconf` is in HOOKS:
+
+`MODULES="vfio vfio_iommu_type1 vfio_pci vfio_virqfd"`
+
+`HOOKS="base udev autodetect modconf block filesystems keyboard fsck"`
+
+Rebuild kernel `linux` and `linux-lts`:
+
+`sudo mkinitcpio -p linux`
+`sudo mkinitcpio -p linux-lts`
+
+Now we need to reboot:
+
+`reboot`
