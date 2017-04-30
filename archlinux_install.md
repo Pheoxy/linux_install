@@ -18,9 +18,11 @@ the boot sequence to allow for NVIDIA boot or we will get a black screen and won
 Press the "END" key to get to the end of the line so we can add something to the boot sequence.
 
 Type:
+
 ```nomodeset```
 
 After boot assuming no errors, type:
+
 ```passwd```
 
 We have to give the "root" user a password so we can SSH into the install enviroment.
@@ -325,8 +327,4 @@ yaourt visual-studio-code
 yaourt gparted
 
 
-<<<<<<< HEAD
 ### KVM software install
-=======
-###### KVM software install
->>>>>>> 01685f832369a52cbe0987fffc8ff46fbea737bf
