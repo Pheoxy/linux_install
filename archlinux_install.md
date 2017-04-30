@@ -325,4 +325,8 @@ yaourt visual-studio-code
 yaourt gparted
 
 
+<<<<<<< HEAD
 ### KVM software install
+=======
+###### KVM software install
+>>>>>>> 01685f832369a52cbe0987fffc8ff46fbea737bf
