@@ -1,7 +1,7 @@
-## Install ArchLinux using UEFI, NVIDIA and SSH for a Windows 10 Gaming KVM Enviroment
+# Install ArchLinux using UEFI, NVIDIA and SSH for a Windows 10 Gaming KVM Enviroment
 
 
-# Requirements
+###### Requirements
 - Motherboard must be IOMMU Compatible and enabled
 - SSH Client
 
@@ -11,7 +11,7 @@ https://www.archlinux.org/download/
 If using Windows use Rufus to image the archlinux.iso with DD Image.
 
 
-# Boot
+###### Boot
 
 Boot from the Imaged USB in UEFI Mode and and before it can auto boot quickly use the Press the "E" to edit
 the boot sequence to allow for NVIDIA boot or we will get a black screen and won't be able to continue.
@@ -41,7 +41,7 @@ ls /sys/firmware/efi/efivars
 ## Install
 
 
-#Preperation
+###### Preperation
 
 First we need to check where connected to the internet.
 ping archlinux.org
@@ -57,7 +57,7 @@ To check:
 timedatectl status
 
 
-# Partitioning
+###### Partitioning
 
 We have to make sure the partition table is set to GPT and find the disk we want to install to:
 lsblk
@@ -101,7 +101,7 @@ mkfs.fat -F32 /dev/sda1
 mkfs.ext4 /dev/sda2
 mkfs.ext4 /dev/sda3
 
-# Mount the Partitions
+###### Mount the Partitions
 
 We now have to mount the partitions so that we can use them:
 mount /dev/sda2 /mnt
@@ -111,7 +111,7 @@ mkdir /mnt/home
 mount /dev/sda3 /mnt/home
 
 
-# Install the base system
+###### Install the base system
 
 First we need to edit the mirrorlist to the closest location to get better update speeds:
 nano /etc/pacman.d/mirrorlist
@@ -133,7 +133,7 @@ Check it in case of errors:
 nano /mnt/etc/fstab
 
 
-# chroot to finish the install
+###### chroot to finish the install
 
 We need to chroot into the installed system:
 arch-chroot /mnt
@@ -165,7 +165,7 @@ type in underneath the "::1" line "127.0.1.1	pheoxy-desktop.localdomain	pheoxy-d
 "CTRL-O" then "ENTER" to save
 "CTRL-X" to exit nano editor
 
-# Setup Network Settings
+###### Setup Network Settings
 
 Find ethernet interface name:
 ls /sys/class/net
@@ -183,17 +183,17 @@ Enable network services:
 systemctl enable systemd-networkd.service
 systemctl enable systemd-resolved.service
 
-# Rebuild Kernel for boot partition
+###### Rebuild Kernel for boot partition
 
 So that we have a stable kernel we use linux-lts:
 mkinitcpio -p linux-lts
 
-# root password
+###### root password
 
 Give "root" user a password for security and accidents:
 passwd
 
-# Add your user
+###### Add your user
 
 Make a user for yourself:
 useradd -m -G wheel -s /bin/bash pheoxy
@@ -207,13 +207,13 @@ uncomment "%wheel ALL=(ALL) ALL"
 "CTRL-O" then "ENTER" to save
 "CTRL-X" to exit nano editor
 
-# Install and enable SSHD Server on Installed System
+###### Install and enable SSHD Server on Installed System
 
 Install and enable it:
 pacman -Sy openssh
 systemctl enable sshd.service
 
-# Install Boot loader
+###### Install Boot loader
 
 Verify EFI varibles are working:
 ls /sys/firmware/efi/efivars
@@ -251,7 +251,7 @@ editor   0
 Now we need to exit chroot:
 exit
 
-# Shutdown to boot into installed system
+###### Shutdown to boot into installed system
 
 First we need to turn off the PC:
 poweroff
@@ -260,7 +260,7 @@ Unplug Archlinux USB
 
 Power on your pc and watch boot.
 
-# Login and Final Install Edits
+###### Login and Final Install Edits
 
 Login with the user you created with its password and then type:
 nano ~/.bashrc
@@ -307,3 +307,13 @@ press y to continue
 
 Now we need to reboot to get into the Desktop Enviroment:
 sudo reboot
+
+Final software to install:
+yaourt chrome
+yaourt tff-google-fonts-git
+yaourt gpmdp
+yaourt visual-studio-code
+yaourt gparted
+
+
+###### KVM software install
