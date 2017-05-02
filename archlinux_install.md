@@ -3,6 +3,7 @@
 ### Requirements
 - Motherboard must be IOMMU Compatible and enabled
 - SSH Client (Recommended)
+- Make sure Host GPU is in Primary PCIE Slot
 
 Download Latest ArchLinux ISO:
 
@@ -251,6 +252,20 @@ For example:
 
 `"CTRL-X"` to exit nano editor
 
+Create `SWAP` file:
+
+`dd if=/dev/zero of=/swapfile bs=1M count=1024`
+
+`chmod 600 /swapfile`
+
+`mkswap /swapfile`
+
+`nano /etc/fstab`
+
+Add this to the bottom:
+
+`/swapfile none swap defaults 0 0`
+
 
 ### Setup Network Settings
 
@@ -348,7 +363,7 @@ Make a template, add intel-ucode for microcode updates, add root PARTUUID, add I
 title          Arch Linux
 linux          /vmlinuz-linux-lts
 initrd         /initramfs-linux-lts.img /intel-ucode.img
-options        root=PARTUUID=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXX rw quiet intel_iommu=on
+options        root=PARTUUID=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXX rw quiet intel_iommu=on pcie_acs_override=downstream
 ```
 
 Edit boot entry for IOMMU:
@@ -393,7 +408,30 @@ Unplug Archlinux USB
 Power on your pc and watch boot.
 
 
+
 ### Login and Final Install Edits
+
+
+Add optional NVIDIA Dependency otherwise NVIDIA can't find `xorg.conf`:
+
+`sudo pacman -S xorg-server-devel`
+
+Generate xorg.conf:
+
+`sudo nvidia-xconfig`
+
+This should fix some screen tearing:
+
+`sudo nano /etc/X11/xorg.conf.d/20-nvidia.conf`
+
+```
+Section "Screen"
+    Identifier     "Screen0"
+    Option         "metamodes" "nvidia-auto-select +0+0 { ForceFullCompositionPipeline = On }"
+    Option         "AllowIndirectGLXProtocol" "off"
+    Option         "TripleBuffer" "on"
+EndSection
+```
 
 Login with the user you created with its password and then type:
 
@@ -430,6 +468,14 @@ Install "htop for terminal process information:
 
 `sudo pacman -S htop`
 
+Avoid screen tearing:
+
+`sudo nano /etc/profile.d/kwin.sh`
+
+Add:
+
+`export KWIN_TRIPLE_BUFFER=1`
+
 Install "yaourt" AUR package helper:
 
 `git clone https://aur.archlinux.org/package-query.git`
@@ -460,7 +506,7 @@ First we need a Display Manager:
 
 Then install the Desktop Enviroment:
 
-`sudo pacman -S plasma kde-applications`
+`sudo pacman -S plasma kde-applications flite`
 
 `all`
 
@@ -472,11 +518,29 @@ Then install the Desktop Enviroment:
 
 `press y to continue`
 
+~~Install a firewall for security:~~
+
+~~`sudo pacman -Sy firewalld`~~
+
+~~`sudo systemctl enable firewalld.service`~~
+
+~~`sudo cp /etc/iptables/empty.rules /etc/iptables/iptables.rules`~~
+
+~~`sudo systemctl enable iptables.service`~~
+
+~~Tell firewalld we are at home and add network interface:~~
+
+~~`sudo firewall-cmd --permanent --zone=home --add-interface=eno1`~~
+
 Now we need to reboot to get into the Desktop Enviroment:
 
 `sudo reboot`
 
 Final software to install:
+
+
+
+`sudo pacman -Sy smartmontools`
 
 `yaourt chrome`
 
@@ -513,7 +577,7 @@ Some annoying kernel drivers:
 `yaourt aic94xx-firmware`
 
 
-## KVM software install
+## KVM
 
 ### Kernel
 
@@ -577,11 +641,13 @@ Check for on both ouputs:
 Kernel driver in use: vfio-pci
 ```
 
+Now we need the `pcie_acs_override=downstream` added to the kernel
+
 ### Software
 
-Now we need to install the software that sets up out Guest OS:
+Now we need to install the software that sets up out Guest OS and optional depencies to get rid of some annoying error logs:
 
-`sudo pacman -Sy qemu libvirt virt-manager`
+`sudo pacman -Sy qemu libvirt virt-manager dmidecode dnsmasq firewalld`
 
 `yaourt ovmf-git`
 
@@ -591,7 +657,7 @@ Then we need to add the OVMF firmware image path we just downloaded to the botto
 
 ```
 nvram = [
-	"/usr/share/ovmf/ovmf_code_x64.bin:/usr/share/ovmf/ovmf_vars_x64.bin"
+	"/usr/share/ovmf/x64/ovmf_code_x64.bin:/usr/share/ovmf/x64/ovmf_vars_x64.bin"
 ]
 ```
 
