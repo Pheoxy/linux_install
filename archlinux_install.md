@@ -269,6 +269,56 @@ Add this to the bottom:
 
 ### Setup Network Settings
 
+Choose NetworkManager if using wifi.
+
+#### NetworkManager (WiFi)
+
+First install it.
+
+If using broadcom drivers:
+
+`sudo pacman -Sy linux-lts-headers`
+
+`sudo pacman -Sy broadcom-wl-dkms`
+
+`sudo pacman -Sy networkmanager plasma-nm iw wpa_supplicant`
+
+Then enable the service:
+
+`sudo systemctl enable NetworkManager.service`
+
+In case on reboot later still no network you may need to blacklist other broadcom drivers, you can check by:
+
+`lspci -k`
+
+If your Wireless Card has:
+
+`Kernel modules: bcma`
+
+You need to blacklist `bcma`:
+
+`sudo nano /etc/modprobe.d/blacklist.conf`
+
+```
+blacklist ssb
+blacklist bcma
+blacklist b43
+blacklist brcmsmac
+```
+
+Check again:
+
+`lspci -k`
+
+It should now show and wireless will now be working:
+
+```
+Kernel driver in use: wl
+Kernel modules: bcma, wl`
+```
+
+#### systemd-network (No WiFi)
+
 Find ethernet interface name:
 
 `ls /sys/class/net`
@@ -609,15 +659,15 @@ HOOKS="base udev autodetect modconf block filesystems keyboard fsck"
 
 Because my IUMMO groups stay grouped I need the `ACS override patch`:
 
-Install Patched kernel `linux-vfio-lts` and downgrade `gpupg` until a bug from 2.1.17+ is fixed:
+Install Patched kernel `linux-vfio-lts` and ~~downgrade `gpupg` until a bug from 2.1.17+ is fixed~~:
 
-`sudo pacman -U https://archive.archlinux.org/packages/g/gnupg/gnupg-2.1.16-2-x86_64.pkg.tar.xz`
+~~`sudo pacman -U https://archive.archlinux.org/packages/g/gnupg/gnupg-2.1.16-2-x86_64.pkg.tar.xz`~~
 
-Add this to `/etc/pacman.conf` so we won't update it by accident until a fix is provided:
+~~Add this to `/etc/pacman.conf` so we won't update it by accident until a fix is provided:~~
 
-`sudo nano /etc/pacman.conf`
+~~`sudo nano /etc/pacman.conf`~~
 
-`IgnorePkg   = gnupg`
+~~`IgnorePkg   = gnupg`~~
 
 Import gpg keys otherwise kernel download will error:
 
