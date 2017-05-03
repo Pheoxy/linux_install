@@ -363,7 +363,7 @@ Make a template, add intel-ucode for microcode updates, add root PARTUUID, add I
 title          Arch Linux
 linux          /vmlinuz-linux-lts
 initrd         /initramfs-linux-lts.img /intel-ucode.img
-options        root=PARTUUID=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXX rw quiet intel_iommu=on pcie_acs_override=downstream
+options        root=PARTUUID=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXX rw quiet intel_iommu=on
 ```
 
 Edit boot entry for IOMMU:
@@ -538,9 +538,9 @@ Now we need to reboot to get into the Desktop Enviroment:
 
 Final software to install:
 
+`sudo pacman -Sy smartmontools filezilla vlc ttf-freefont libva-vdpau-driver cups gtk3-print-backends system-config-printer`
 
-
-`sudo pacman -Sy smartmontools`
+`sudo systemctl enable org.cups.cupsd.service`
 
 `yaourt chrome`
 
@@ -555,18 +555,6 @@ Final software to install:
 `yaourt discord`
 
 `yaourt skype`
-
-`sudo pacman -Sy filezilla`
-
-`sudo pacman -Sy vlc`
-
-`sudo pacman -Sy ttf-freefont`
-
-`sudo pacman -Sy libva-vdpau-driver`
-
-`sudo pacman -Sy cups gtk3-print-backends system-config-printer`
-
-`sudo systemctl enable org.cups.cupsd.service`
 
 `yaourt samsung-unified-driver`
 
@@ -619,6 +607,38 @@ MODULES="vfio vfio_iommu_type1 vfio_pci vfio_virqfd"
 HOOKS="base udev autodetect modconf block filesystems keyboard fsck"
 ```
 
+Because my IUMMO groups stay grouped I need the `ACS override patch`:
+
+Install Patched kernel `linux-vfio-lts` and downgrade `gpupg` until a bug from 2.1.17+ is fixed:
+
+`sudo pacman -U https://archive.archlinux.org/packages/g/gnupg/gnupg-2.1.16-2-x86_64.pkg.tar.xz`
+
+Add this to `/etc/pacman.conf` so we won't update it by accident until a fix is provided:
+
+`sudo nano /etc/pacman.conf`
+
+`IgnorePkg   = gnupg`
+
+Import gpg keys otherwise kernel download will error:
+
+`sudo gpg --recv-keys 79BE3E4300411886`
+
+`sudo gpg --recv-keys 38DBBDC86092693E`
+
+If that fails to import edit `~/.gnupg/dirmngr.conf`:
+
+`sudo nano ~/.gnupg/dirmngr.conf`
+
+Add `keyserver hkp://pgp.mit.edu` to the bottom.
+
+Install kernel:
+
+`yaourt linux-vfio-lts` is flagged out of date so lets update the `pkgbuild`ourselves
+
+`nano`
+
+And then change the `pkgver=4.9.*` with `*` as the kernel version number. Then fix the `sha256sums=` of the patch update to the latest.
+
 Rebuild kernel `linux` and `linux-lts`:
 
 `sudo mkinitcpio -p linux`
@@ -641,7 +661,25 @@ Check for on both ouputs:
 Kernel driver in use: vfio-pci
 ```
 
-Now we need the `pcie_acs_override=downstream` added to the kernel
+Now we need the `pcie_acs_override=downstream` added to the kernel options paremeters and change the kernel to `linux-vfio-lts`:
+
+`nano /boot/loader/entries/arch.conf`
+
+```
+title          Arch Linux
+linux          /vmlinuz-linux-vfio-lts
+initrd         /initramfs-linux-vfio-lts.img /intel-ucode.img
+options        root=PARTUUID=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXX rw quiet intel_iommu=on pcie_acs_override=downstream
+```
+
+`"CTRL-O" then "ENTER" to save`
+
+`"CTRL-X" to exit nano editor`
+
+Now we need to reboot to check the IUMMO groups:
+
+`sudo reboot`
+
 
 ### Software
 
