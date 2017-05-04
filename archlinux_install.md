@@ -635,12 +635,20 @@ First we must find the PCI address's of our GPU:
 02:00.1 Audio device [0403]: NVIDIA Corporation GM204 High Definition Audio Controller [10de:0fbb] (rev a1)
 ```
 
+Now we need to find the wireless card:
+
+`lspci -nn | grep 05:00.0`
+
+```
+05:00.0 Network controller [0280]: Broadcom Limited BCM4360 802.11ac Wireless Network Adapter [14e4:43a0] (rev 03)
+```
+
 Okay so now I know what address's my PCI Cards are we need to isolate the one we want to use for the Windows Guest:
 
 `sudo nano /etc/modprobe.d/vfio.conf`
 
 ```
-options vfio-pci ids=10de:13c2,10de:0fbb
+options vfio-pci ids=10de:13c2,10de:0fbb,14e4:43a0
 ```
 
 To make sure it does edit:
@@ -655,6 +663,55 @@ MODULES="vfio vfio_iommu_type1 vfio_pci vfio_virqfd"
 
 ```
 HOOKS="base udev autodetect modconf block filesystems keyboard fsck"
+```
+
+We also need to get some modules loaded at boot to improve some performance:
+
+
+`sudo nano /etc/modules-load.d/virtio-pci.conf`
+
+And Paste:
+
+```
+# Load virtio-pci.ko at boot
+virtio-pci
+```
+
+Do this for these modules as well:
+
+`sudo nano /etc/modules-load.d/virtio-net.conf`
+
+```
+# Load virtio-net.ko at boot
+virtio-net
+```
+
+`sudo nano /etc/modules-load.d/virtio-blk.conf`
+
+```
+# Load virtio-blk.ko at boot
+virtio-blk
+```
+
+`sudo nano /etc/modules-load.d/virtio-balloon.conf`
+
+```
+# Load virtio-balloon.ko at boot
+virtio-balloon
+```
+
+`sudo nano /etc/modules-load.d/virtio-ring.conf`
+
+```
+# Load virtio-ring.ko at boot
+virtio-ring
+```
+
+`sudo nano /etc/modules-load.d/virtio.conf`
+
+```
+# Load virtio.ko at boot
+virtio
 ```
 
 Because my IUMMO groups stay grouped I need the `ACS override patch`:
@@ -719,7 +776,7 @@ Now we need the `pcie_acs_override=downstream` added to the kernel options parem
 title          Arch Linux
 linux          /vmlinuz-linux-vfio-lts
 initrd         /initramfs-linux-vfio-lts.img /intel-ucode.img
-options        root=PARTUUID=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXX rw quiet intel_iommu=on pcie_acs_override=downstream
+options        root=PARTUUID=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXX rw quiet intel_iommu=on pcie_acs_override=downstream nvidia-drm.modeset=1
 ```
 
 `"CTRL-O" then "ENTER" to save`
@@ -729,6 +786,14 @@ options        root=PARTUUID=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXX rw quiet intel_i
 Now we need to reboot to check the IUMMO groups:
 
 `sudo reboot`
+
+Add `blacklist nouveau` to `/etc/modprobe.d/blacklist.conf` if display manager crashes:
+
+`sudo nano /etc/modprobe.d/blacklist.conf`
+
+So we can display Screen Information:
+
+`sudo pacman -Sy xorg-xrandr`
 
 
 ### Software
@@ -753,3 +818,23 @@ Now we need to enable the `libvirtd.service`:
 
 `sudo systemctl enable --now libvirtd`
 `sudo systemctl enable virtlogd.socket`
+
+Make the VM then edit the config:
+
+`sudo EDITOR=nano virsh edit win10`
+
+Add `<vendor_id state='on' value='whatever'/>` between:
+
+```
+<hyperv>
+<vendor_id state='on' value='whatever'/>
+</hyperv>
+```
+
+And add this directly after `</hyperv>`:
+
+```
+<kvm>
+<hidden state='on'/>
+</kvm>
+```
