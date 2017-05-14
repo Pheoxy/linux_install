@@ -250,7 +250,7 @@ Copy and paste the generated file and uncomment the servers:
 `nano /etc/pacman.d/mirrorlist`
 
 #### Install base system
-`pacstrap -i /mnt base base-devel`
+`pacstrap -i /mnt base base-devel openssh`
 
 Generate the fstab so we can install a boot loader:
 
@@ -519,7 +519,7 @@ Give user sudo permissions for updates and to install software:
 
 uncomment `%wheel ALL=(ALL) ALL`
 
-### Finished setup
+### Finished core setup
 Now we need to exit chroot and boot into our system:
 
 `exit`
@@ -527,3 +527,188 @@ Now we need to exit chroot and boot into our system:
 `poweroff`
 
 Unplug your Archlinux.iso and turn you computer back on and you should be greeted with a login screen.
+
+## Install i3
+After startup we need login and connect to the internet again, login with the user we created.
+
+For Wifi:
+
+`nmtui`
+
+Then start sshd for remote again:
+
+`sudo systemctl start sshd`
+
+##### Set bashrc
+Just some color for less confusion:
+
+`nano ~/.bashrc`
+
+```
+#
+# ~/.bashrc
+#
+
+# If not running interactively, don't do anything
+[[ $- != *i* ]] && return
+
+alias ls='ls --color=auto'
+PS1='\[\033[38;5;10m\]\u@\h\[$(tput sgr0)\]\[\033[38;5;15m\]:[\W]: \\$ \[$(tput sgr0)\]'
+```
+
+#### Video Drivers
+First we need our video drivers working properly so xorg will pick them up.
+
+For ATI:
+
+`sudo pacman -Sy xf86-video-ati mesa mesa-vdpau libva-mesa-driver libva-vdpau-driver`
+
+`sudo nano /etc/mkinitcpio.conf`
+
+`MODULES="radeon"`
+
+`sudo mkinitcpio -p linux`
+
+Reboot to use changes:
+
+`sudo reboot`
+
+#### Xorg Install
+now we need to install xorg:
+
+`sudo pacman -Sy xorg xorg-xinit xscreensaver`
+
+##### ATI Driver Config
+
+`sudo nano /etc/X11/xorg.conf.d/20-radeon.conf`
+
+```
+Section "Device"
+    Identifier "Radeon"
+    Driver "radeon"
+EndSection
+```
+
+`sudo nano /etc/X11/xorg.conf.d/10-monitor.conf`
+
+```
+Section "Monitor"
+    Identifier             "Monitor0"
+EndSection
+
+Section "Device"
+    Identifier             "Device0"
+    Driver                 "radeon"
+EndSection
+
+Section "Screen"
+    Identifier             "Screen0"
+    Device                 "Device0"
+    Monitor                "Monitor0"
+    DefaultDepth           24
+    SubSection             "Display"
+        Depth              16
+        Modes              "1366x768_60.00"
+    EndSubSection
+EndSection
+```
+
+Reboot again to make sure.
+
+`sudo reboot`
+
+#### Install i3
+Finally we get to install it:
+
+`sudo pacman -Sy i3`
+
+`sudo nano ~/.xserverrc`
+
+```
+#!/bin/sh
+
+exec /usr/bin/Xorg -nolisten tcp "$@" vt$XDG_VTNR
+```
+
+`sudo chown pheoxy:pheoxy ~/.xserverrc`
+
+`sudo nano ~/.bash_profile`
+
+```
+if [ -z "$DISPLAY" ] && [ -n "$XDG_VTNR" ] && [ "$XDG_VTNR" -eq 1 ]; then
+  exec startx
+fi
+```
+
+`sudo cp /etc/X11/xinit/xinitrc ~/.xinitrc`
+
+`sudo chown pheoxy:pheoxy ~/.xinitrc`
+
+`sudo nano ~/.xinitrc`
+
+Comment out:
+
+```
+#twm &
+#xclock -geometry 50x50-1+1 &
+#xterm -geometry 80x50+494+51 &
+#xterm -geometry 80x20+494-0 &
+#exec xterm -geometry 80x66+0+0 -name login
+```
+
+And add this to the bottom:
+
+```
+xscreensaver &
+exec i3
+```
+
+Reboot and login to check if it worked.
+
+### Extras
+#### Software
+Yaourt:
+
+`sudo pacman -Sy git`
+
+```
+git clone https://aur.archlinux.org/package-query.git
+cd package-query
+makepkg -si
+cd ..
+git clone https://aur.archlinux.org/yaourt.git
+cd yaourt
+makepkg -si
+cd
+```
+
+Terminal:
+
+`sudo pacman -Sy termite`
+
+Startmenu:
+
+`sudo pacman -Sy rofi`
+
+```
+sudo rofi -show run -modi run -location 1 -width 100 \
+		 -lines 2 -line-margin 0 -line-padding 1 \
+		 -separator-style none -font "mono 10" -columns 9 -bw 0 \
+		 -disable-history \
+		 -hide-scrollbar \
+		 -color-window "#222222, #222222, #b1b4b3" \
+		 -color-normal "#222222, #b1b4b3, #222222, #005577, #b1b4b3" \
+		 -color-active "#222222, #b1b4b3, #222222, #007763, #b1b4b3" \
+		 -color-urgent "#222222, #b1b4b3, #222222, #77003d, #b1b4b3" \
+		 -kb-row-select "Tab" -kb-row-tab ""
+```
+
+
+#### Appearance
+First we want to install the config software
+
+`sudo pacman -Sy lxappearance qt4`
+
+Icons:
+
+`sudo pacman -Sy elementary-icon-theme`
