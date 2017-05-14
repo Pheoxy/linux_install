@@ -36,6 +36,10 @@ After setting your password we now need to start the SSH service :
 
 `systemctl start sshd.service`
 
+If your using wifi you need to connect to your Wifi Network first:
+
+`wifi-menu`
+
 Type in and look for the `inet` entry that should corrospond with your LAN IP address's to find the IP Address of the Arch Install Computer:
 
 `ip addr`
