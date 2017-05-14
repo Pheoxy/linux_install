@@ -152,13 +152,7 @@ Move cursor to the URL and hold `"CTRL-K"` to cut
 
 Move cursor above other address at the top and hold `"CTRL-U"` to paste
 
-Do this until you have at least 3 entrys you have picked and then:
-
-`"CTRL-O"` then `"ENTER"` to save
-
-`"CTRL-X"` to exit nano editor
-
-Install Archlinux system files:
+Do this until you have at least 3 entrys you have picked and then Install Archlinux system files:
 
 `pacstrap /mnt base base-devel linux-lts nvidia-lts intel-ucode git`
 
@@ -191,17 +185,9 @@ Set the localizations:
 
 Uncomment `en_AU.UTF-8 UTF-8`
 
-`"CTRL-O"` then `"ENTER"` to save
-
-`"CTRL-X"` to exit nano editor
-
 `nano /etc/locale.conf`
 
 type in `LANG=en_AU.UTF-8`
-
-`"CTRL-O"` then `"ENTER"` to save
-
-`"CTRL-X"` to exit nano editor
 
 `locale-gen`
 
@@ -210,10 +196,6 @@ Create the Hostname for the system:
 `nano /etc/hostname`
 
 type in `pheoxy-desktop`
-
-`"CTRL-O"` then `"ENTER"` to save
-
-`"CTRL-X"` to exit nano editor
 
 `nano /etc/hosts` 
 
@@ -263,9 +245,9 @@ Choose NetworkManager if using wifi.
 
 First install it.
 
-If using broadcom drivers:
-
 `sudo pacman -Sy linux-lts-headers`
+
+If using broadcom drivers:
 
 `sudo pacman -Sy broadcom-wl-dkms`
 
@@ -283,7 +265,7 @@ If your Wireless Card has:
 
 `Kernel modules: bcma`
 
-You need to blacklist `bcma`:
+You need to blacklist these if using broadcom drivers:
 
 `sudo nano /etc/modprobe.d/blacklist.conf`
 
@@ -294,7 +276,7 @@ blacklist b43
 blacklist brcmsmac
 ```
 
-Check again:
+Reboot and check again:
 
 `lspci -k`
 
@@ -304,3 +286,4 @@ It should now show and wireless will now be working:
 Kernel driver in use: wl
 Kernel modules: bcma, wl`
 ```
+
