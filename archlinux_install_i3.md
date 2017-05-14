@@ -101,7 +101,7 @@ Create a ESP boot partition (It is recommended to have a ESP partition of 512MiB
 `ef00`
 
 ##### Make root partition
-Make root partition with 20GB:
+Make root partition:
 
 `n`
 
@@ -180,7 +180,7 @@ Set bootable flag:
 `1`
 
 ##### Make root partition
-Make root partition with 20GB:
+Make root partition:
 
 `n`
 
