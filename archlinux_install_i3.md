@@ -50,7 +50,7 @@ Use that IP address to SSH into the install enviroment and login with `root` and
 ### Preperation
 First we need to check where connected to the internet:
 
-`ping archlinux.org`
+`ping -c 3 archlinux.org`
 
 We also have to check the clock is set to your timezones time so update servers don't get confused:
 
@@ -88,7 +88,7 @@ Now how much space have we got:
 `p`
 
 ##### Make esp /boot partition
-Create a ESP boot partition (It is recommended to have a ESP partion of 512MiB):
+Create a ESP boot partition (It is recommended to have a ESP partition of 512MiB):
 
 `n`
 
@@ -99,10 +99,6 @@ Create a ESP boot partition (It is recommended to have a ESP partion of 512MiB):
 `+512M`
 
 `ef00`
-
-Print partitions again to check:
-
-`p`
 
 ##### Make root partition
 Make root partition with 20GB:
@@ -116,6 +112,10 @@ Make root partition with 20GB:
 `"enter key"` Use remaining space.
 
 `8304`
+
+Print partitions to check:
+
+`p`
 
 Write Changes to disk and exit back to install terminal (answer "y" for yes):
 
@@ -151,6 +151,54 @@ Now we need to mount them:
 If your using BIOS:
 
 `fdisk /dev/sda`
+
+Now we want to create a DOS partition table (answer "y" for yes):
+
+`o`
+
+Now how much space have we got:
+
+`p`
+
+##### Make /boot partition
+Create a boot partition (It is recommended to have a boot partition of 300M):
+
+`n`
+
+`p`
+
+`1`
+
+`"enter key"` Keep sectors next to each so we dont waist space.
+
+`+300M`
+
+Set bootable flag:
+
+`a`
+
+`1`
+
+##### Make root partition
+Make root partition with 20GB:
+
+`n`
+
+`p`
+
+`2`
+
+`"enter key"` Keep sectors next to each so we dont waist space.
+
+`"enter key"` Use remaining space.
+
+Print partitions to check:
+
+`p`
+
+Write Changes to disk and exit back to install terminal (answer "y" for yes):
+
+`w`
 
 #### LUK's parition encryption
 If you want to add encryption for root enter the command below and choose a password:
@@ -193,15 +241,13 @@ We now have to mount the partitions so that we can use them:
 #### Select update servers
 First we need to edit the mirrorlist to the closest location to get better update speeds:
 
+`rm /etc/pacman.d/mirrorlist`
+
+https://www.archlinux.org/mirrorlist/
+
+Copy and paste the generated file and uncomment the servers:
+
 `nano /etc/pacman.d/mirrorlist`
-
-`"CTRL-W"` and type in `Australia`
-
-Move cursor to the URL and hold `"CTRL-K"` to cut
-
-Move cursor above other address at the top and hold `"CTRL-U"` to paste
-
-Do this until you have at least 3 entrys you have picked and then Install Archlinux system files:
 
 #### Install base system
 `pacstrap -i /mnt base base-devel`
