@@ -1,8 +1,8 @@
 # Archlinux with i3
 
 ### Boot
-
-Boot from the Imaged USB in UEFI Mode and and before it can auto boot quickly use the Press the `"E"` to edit
+#### UEFI
+Boot from the Imaged USB in UEFI Mode and before it can auto boot quickly use the Press the `"E"` to edit
 the boot sequence to allow for NVIDIA boot or we will get a black screen and won't be able to continue.
 
 Press the `"END"` key to get to the end of the line so we can add something to the boot sequence.
@@ -10,6 +10,18 @@ Press the `"END"` key to get to the end of the line so we can add something to t
 Type:
 
 `nomodeset`
+
+#### BIOS
+Boot from the Imaged USB in BIOS Mode and before it can auto boot quickly use the Press the `"E"` to edit
+the boot sequence to allow for NVIDIA boot or we will get a black screen and won't be able to continue.
+
+Press the `"END"` key to get to the end of the line so we can add something to the boot sequence.
+
+Type:
+
+`nomodeset`
+
+#### SSH Setup so we can copy/paste
 
 After boot assuming no errors, type:
 
@@ -27,10 +39,10 @@ Type in and look for the `inet` entry that should corrospond with your LAN IP ad
 
 Use that IP address to SSH into the install enviroment and login with `root` and the password we set earlier.
 
+#### Check UEFI booted correctly
 Now using your SSH console we need to check we booted with UEFI, type:
 
 `ls /sys/firmware/efi/efivars`
-
 
 
 ## Install
@@ -61,6 +73,8 @@ To check:
 We have to make sure the partition table is set to GPT and find the disk we want to install to:
 
 `lsblk`
+
+#### UEFI
 
 `gdisk /dev/sda`
 
@@ -123,6 +137,9 @@ Now that the partitions have been created they need to be formatted to the appri
 `mkfs.ext4 /dev/sda2`
 
 `mkfs.ext4 /dev/sda3`
+
+
+#### BIOS
 
 
 ### Mount the Partitions
