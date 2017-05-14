@@ -487,6 +487,7 @@ Then we need to regenerate the initrams:
 
 `mkinitcpio -p linux`
 
+##### Install Grub
 Tell grub what hard drive to install to:
 
 `grub-install --target=i386-pc /dev/sda`
