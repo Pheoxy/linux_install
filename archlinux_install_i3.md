@@ -466,6 +466,7 @@ First we need to install `grub`:
 
 `pacman -Sy grub`
 
+##### Encryption
 If you used encryption we need to add some paremeters to the kernel and a hook to `mkinitcpio.conf` config:
 
 `nano /etc/default/grub`
