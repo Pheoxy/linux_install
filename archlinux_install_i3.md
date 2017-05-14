@@ -1,5 +1,4 @@
 # Archlinux with i3
-
 ### Boot
 #### UEFI
 Boot from the Imaged USB in UEFI Mode and before it can auto boot quickly use the Press the `"E"` to edit
@@ -22,7 +21,6 @@ Type:
 `nomodeset`
 
 #### SSH Setup so we can copy/paste
-
 After boot assuming no errors, type:
 
 `passwd`
@@ -46,9 +44,7 @@ Now using your SSH console we need to check we booted with UEFI, type:
 
 
 ## Install
-
 ### Preperation
-
 First we need to check where connected to the internet:
 
 `ping archlinux.org`
@@ -69,13 +65,13 @@ To check:
 
 
 ### Partitioning
-
 We have to make sure the partition table is set to GPT and find the disk we want to install to:
 
 `lsblk`
 
-#### UEFI
 
+
+#### UEFI
 `gdisk /dev/sda`
 
 Now we want to create a GPT partition table (answer "y" for yes):
@@ -86,6 +82,7 @@ Now how much space have we got:
 
 `p`
 
+##### Make esp /boot partition
 Create a ESP boot partition (It is recommended to have a ESP partion of 512MiB):
 
 `n`
@@ -102,6 +99,7 @@ Print partitions again to check:
 
 `p`
 
+##### Make root partition
 Make root partition with 20GB:
 
 `n`
@@ -110,41 +108,44 @@ Make root partition with 20GB:
 
 `"enter key"` Keep sectors next to each so we dont waist space.
 
-`+20G`
-
-`8304`
-
-Make home partition with remaining space:
-
-`n`
-
-`3`
-
-`"enter key"` Keep sectors next to each so we dont waist space.
-
 `"enter key"` Use remaining space.
 
-`8302`
+`8304`
 
 Write Changes to disk and exit back to install terminal (answer "y" for yes):
 
 `w`
 
-Now that the partitions have been created they need to be formatted to the appriate filesystem:
+#### LUK's parition encryption
+If you want to add encryption for root enter the command below and choose a password:
+
+```
+cryptsetup --verbose --cipher aes-xts-plain64 --key-size 512 --hash sha512 --iter-time 5000 --use-random luksFormat /dev/sda2
+```
+
+Now we need to unlock it so that we can use the partitions that have been created. They can now to be formatted to the appropriate filesystem:
+
+`cryptsetup open --type luks /dev/sda2 cryptroot`
+
+`mkfs.ext4 /dev/mapper/cryptroot`
+
+`mkfs.fat -F32 /dev/sda1`
+
+##### Mount partitions
+Now we need to mount them:
+
+`mount -t ext4 /dev/mapper/cryptroot /mnt`
+
+`mkdir -p /mnt/boot`
+
+`mount -t ext4 /dev/sda1 /mnt/boot`
+
+#### Mount the Partitions
+We now have to mount the partitions so that we can use them:
 
 `mkfs.fat -F32 /dev/sda1`
 
 `mkfs.ext4 /dev/sda2`
-
-`mkfs.ext4 /dev/sda3`
-
-
-#### BIOS
-
-
-### Mount the Partitions
-
-We now have to mount the partitions so that we can use them:
 
 `mount /dev/sda2 /mnt`
 
@@ -152,13 +153,12 @@ We now have to mount the partitions so that we can use them:
 
 `mount /dev/sda1 /mnt/boot`
 
-`mkdir /mnt/home`
-
-`mount /dev/sda3 /mnt/home`
+#### BIOS
 
 
-### Install the base system
 
+### Install
+#### Select update servers
 First we need to edit the mirrorlist to the closest location to get better update speeds:
 
 `nano /etc/pacman.d/mirrorlist`
@@ -171,6 +171,7 @@ Move cursor above other address at the top and hold `"CTRL-U"` to paste
 
 Do this until you have at least 3 entrys you have picked and then Install Archlinux system files:
 
+#### Install base system
 `pacstrap /mnt base base-devel linux-lts nvidia-lts intel-ucode git`
 
 Generate the fstab so we can install a boot loader:
@@ -181,13 +182,12 @@ Check it in case of errors:
 
 `nano /mnt/etc/fstab`
 
-
 ### chroot to finish the install
-
 We need to chroot into the installed system:
 
 `arch-chroot /mnt`
 
+#### Set timezone and language
 We need to set the timezone again for the installed system now:
 
 `ln -sf /usr/share/zoneinfo/Australia/Perth /etc/localtime`
@@ -208,6 +208,7 @@ type in `LANG=en_AU.UTF-8`
 
 `locale-gen`
 
+#### Hostname
 Create the Hostname for the system:
 
 `nano /etc/hostname`
@@ -235,10 +236,7 @@ For example:
 # End of file
 ```
 
-`"CTRL-O"` then `"ENTER"` to save
-
-`"CTRL-X"` to exit nano editor
-
+#### Create Swap
 Create `SWAP` file:
 
 `dd if=/dev/zero of=/swapfile bs=1M count=1024`
@@ -253,22 +251,18 @@ Add this to the bottom:
 
 `/swapfile none swap defaults 0 0`
 
-
 ### Setup Network Settings
-
 Choose NetworkManager if using wifi.
 
 #### NetworkManager (WiFi)
 
 First install it.
 
-`sudo pacman -Sy linux-lts-headers`
+`sudo pacman -Sy networkmanager wpa_supplicant`
 
 If using broadcom drivers:
 
 `sudo pacman -Sy broadcom-wl-dkms`
-
-`sudo pacman -Sy networkmanager plasma-nm iw wpa_supplicant`
 
 Then enable the service:
 
