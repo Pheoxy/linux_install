@@ -153,22 +153,15 @@ We now have to mount the partitions so that we can use them:
 
 
 ### Install the base system
-
 First we need to edit the mirrorlist to the closest location to get better update speeds:
 
+`rm /etc/pacman.d/mirrorlist`
+
+https://www.archlinux.org/mirrorlist/
+
+Copy and paste the generated file and uncomment the servers:
+
 `nano /etc/pacman.d/mirrorlist`
-
-`"CTRL-W"` and type in `Australia`
-
-Move cursor to the URL and hold `"CTRL-K"` to cut
-
-Move cursor above other address at the top and hold `"CTRL-U"` to paste
-
-Do this until you have at least 3 entrys you have picked and then:
-
-`"CTRL-O"` then `"ENTER"` to save
-
-`"CTRL-X"` to exit nano editor
 
 Install Archlinux system files:
 
