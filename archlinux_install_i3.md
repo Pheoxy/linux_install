@@ -11,7 +11,7 @@ Type:
 `nomodeset`
 
 #### BIOS
-Boot from the Imaged USB in BIOS Mode and before it can auto boot quickly use the Press the `"E"` to edit
+Boot from the Imaged USB in BIOS Mode and before it can auto boot quickly use the Press the `"TAB"` to edit
 the boot sequence to allow for NVIDIA boot or we will get a black screen and won't be able to continue.
 
 Press the `"END"` key to get to the end of the line so we can add something to the boot sequence.
@@ -72,6 +72,8 @@ We have to make sure the partition table is set to GPT and find the disk we want
 
 
 #### UEFI
+If your using UEFI:
+
 `gdisk /dev/sda`
 
 Now we want to create a GPT partition table (answer "y" for yes):
@@ -140,10 +142,41 @@ Now we need to mount them:
 
 `mount -t ext4 /dev/sda1 /mnt/boot`
 
-#### Mount the Partitions
+
+
+#### BIOS
+If your using BIOS:
+
+`fdisk /dev/sda`
+
+#### LUK's parition encryption
+If you want to add encryption for root enter the command below and choose a password:
+
+```
+cryptsetup --verbose --cipher aes-xts-plain64 --key-size 512 --hash sha512 --iter-time 5000 --use-random luksFormat /dev/sda2
+```
+
+Now we need to unlock it so that we can use the partitions that have been created. They can now to be formatted to the appropriate filesystem:
+
+`cryptsetup open --type luks /dev/sda2 cryptroot`
+
+`mkfs.ext4 /dev/mapper/cryptroot`
+
+`mkfs.ext4 /dev/sda1`
+
+##### Mount partitions
+Now we need to mount them:
+
+`mount -t ext4 /dev/mapper/cryptroot /mnt`
+
+`mkdir -p /mnt/boot`
+
+`mount -t ext4 /dev/sda1 /mnt/boot`
+
+##### Mount the Partitions
 We now have to mount the partitions so that we can use them:
 
-`mkfs.fat -F32 /dev/sda1`
+`mkfs.ext4 /dev/sda1`
 
 `mkfs.ext4 /dev/sda2`
 
@@ -152,10 +185,6 @@ We now have to mount the partitions so that we can use them:
 `mkdir /mnt/boot`
 
 `mount /dev/sda1 /mnt/boot`
-
-#### BIOS
-
-
 
 ### Install
 #### Select update servers
@@ -172,7 +201,7 @@ Move cursor above other address at the top and hold `"CTRL-U"` to paste
 Do this until you have at least 3 entrys you have picked and then Install Archlinux system files:
 
 #### Install base system
-`pacstrap /mnt base base-devel linux-lts nvidia-lts intel-ucode git`
+`pacstrap -i /mnt base base-devel`
 
 Generate the fstab so we can install a boot loader:
 
@@ -181,6 +210,10 @@ Generate the fstab so we can install a boot loader:
 Check it in case of errors:
 
 `nano /mnt/etc/fstab`
+
+Install `intel-ucode` if you have a Intel CPU:
+
+`pacstrap -i /mnt intel-ucode`
 
 ### chroot to finish the install
 We need to chroot into the installed system:
@@ -254,19 +287,10 @@ Add this to the bottom:
 ### Setup Network Settings
 Choose NetworkManager if using wifi.
 
-#### NetworkManager (WiFi)
-
-First install it.
-
-`sudo pacman -Sy networkmanager wpa_supplicant`
-
+##### Broadcom Wifi Card
 If using broadcom drivers:
 
 `sudo pacman -Sy broadcom-wl-dkms`
-
-Then enable the service:
-
-`sudo systemctl enable NetworkManager.service`
 
 In case on reboot later still no network you may need to blacklist other broadcom drivers, you can check by:
 
@@ -298,3 +322,157 @@ Kernel driver in use: wl
 Kernel modules: bcma, wl`
 ```
 
+#### NetworkManager (WiFi)
+First install it.
+
+`sudo pacman -Sy networkmanager wpa_supplicant`
+
+Then enable the service:
+
+`sudo systemctl enable NetworkManager.service`
+
+#### systemd-network (No WiFi)
+Find ethernet interface name:
+
+`ls /sys/class/net`
+
+Network Configuration:
+
+`nano /etc/systemd/network/50-wired.network`
+
+Paste or type in:
+
+```
+[Match]
+Name=eno1
+
+[Network]
+DHCP=ipv4
+```
+
+Enable network services:
+
+`systemctl enable systemd-networkd.service`
+
+`systemctl enable systemd-resolved.service`
+
+### Install Boot loader
+#### UEFI (systemd-boot)
+Use systemd-boot so we don't have to install any extra packages and verify EFI varibles are working:
+
+`ls /sys/firmware/efi/efivars`
+
+If you used encryption we need to add some paremeters to the kernel and a hook to `mkinitcpio.conf` config:
+
+`nano /etc/mkinitcpio.conf`
+
+`HOOKS="base udev autodetect modconf block encrypt filesystems keyboard fsck"`
+
+Then we need to regenerate the initrams:
+
+`mkinitcpio -p linux`
+
+Setup boot loader so System will boot:
+
+`bootctl --path=/boot install`
+
+Find PARTUUID for `root` boot entry:
+
+`blkid -s PARTUUID -o value /dev/sda2`
+
+Make a template, add `intel-ucode` for microcode updates if you have a intel CPU and add root PARTUUID:
+
+```
+title          Arch Linux
+linux          /vmlinuz-linux
+initrd         /initramfs-linux.img /intel-ucode.img
+options        root=PARTUUID=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXX rw quiet
+```
+
+If encrypted:
+
+```
+title          Arch Linux
+linux          /vmlinuz-linux
+initrd         /initramfs-linux.img /intel-ucode.img
+options cryptdevice=UUID=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXX:cryptroot root=/dev/mapper/cryptroot quiet rw
+```
+
+Paste or type above template
+
+`bootctl update`
+
+Edit boot loader:
+
+`nano /boot/loader/loader.conf`
+
+`Paste or Type below lines`
+
+`default  arch`
+
+`editor   0`
+
+#### BIOS
+First we need to install `grub`:
+
+`pacman -Sy grub`
+
+If you used encryption we need to add some paremeters to the kernel and a hook to `mkinitcpio.conf` config:
+
+`nano /etc/default/grub`
+
+```
+GRUB_DEFAULT=0
+GRUB_TIMEOUT=3
+GRUB_DISTRIBUTOR="Arch"
+GRUB_CMDLINE_LINUX_DEFAULT="quiet"
+GRUB_CMDLINE_LINUX="cryptdevice=/dev/sda2:cryptroot"
+```
+
+`nano /etc/mkinitcpio.conf`
+
+`HOOKS="base udev autodetect modconf block encrypt filesystems keyboard fsck"`
+
+Then we need to regenerate the initrams:
+
+`mkinitcpio -p linux`
+
+Tell grub what hard drive to install to:
+
+`grub-install --target=i386-pc /dev/sda`
+
+Generate the main configuration file:
+
+`grub-mkconfig -o /boot/grub/grub.cfg`
+
+### Security
+#### "root" password security
+
+Give `root` user a password for security and accidents:
+
+`passwd`
+
+#### Add your user
+
+Make a user for yourself:
+
+`useradd -m -G wheel -s /bin/bash pheoxy`
+
+Create a password for your user:
+
+`passwd pheoxy`
+
+Give user sudo permissions for updates and to install software:
+
+`EDITOR=nano visudo`
+
+uncomment `%wheel ALL=(ALL) ALL`
+
+### Finished setup
+Now we need to exit chroot and boot into our system:
+
+`exit`
+
+`poweroff`
+
+Unplug your Archlinux.iso and turn you computer back on and you should be greeted with a login screen.
