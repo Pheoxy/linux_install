@@ -559,7 +559,8 @@ PS1='\[\033[38;5;10m\]\u@\h\[$(tput sgr0)\]\[\033[38;5;15m\]:[\W]: \\$ \[$(tput 
 #### Video Drivers
 First we need our video drivers working properly so xorg will pick them up.
 
-For ATI:
+##### ATI Driver Config
+This for ATI GPU;s.
 
 `sudo pacman -Sy xf86-video-ati mesa mesa-vdpau libva-mesa-driver libva-vdpau-driver`
 
@@ -572,13 +573,6 @@ For ATI:
 Reboot to use changes:
 
 `sudo reboot`
-
-#### Xorg Install
-now we need to install xorg:
-
-`sudo pacman -Sy xorg xorg-xinit xscreensaver`
-
-##### ATI Driver Config
 
 `sudo nano /etc/X11/xorg.conf.d/20-radeon.conf`
 
@@ -616,6 +610,13 @@ EndSection
 Reboot again to make sure.
 
 `sudo reboot`
+
+##### NVIDIA Driver Config
+
+#### Xorg Install
+now we need to install xorg:
+
+`sudo pacman -Sy xorg xorg-xinit`
 
 #### Install i3
 Finally we get to install it:
@@ -659,7 +660,6 @@ Comment out:
 And add this to the bottom:
 
 ```
-xscreensaver &
 exec i3
 ```
 
@@ -682,26 +682,18 @@ makepkg -si
 cd
 ```
 
+Fonts:
+
+`sudo pacman -Sy ttf-hack`
+
 Terminal:
 
-`sudo pacman -Sy termite`
+`sudo pacman -Sy gnome-terminal`
 
 Startmenu:
 
-`sudo pacman -Sy rofi`
+`sudo pacman -Sy d-menu`
 
-```
-sudo rofi -show run -modi run -location 1 -width 100 \
-		 -lines 2 -line-margin 0 -line-padding 1 \
-		 -separator-style none -font "mono 10" -columns 9 -bw 0 \
-		 -disable-history \
-		 -hide-scrollbar \
-		 -color-window "#222222, #222222, #b1b4b3" \
-		 -color-normal "#222222, #b1b4b3, #222222, #005577, #b1b4b3" \
-		 -color-active "#222222, #b1b4b3, #222222, #007763, #b1b4b3" \
-		 -color-urgent "#222222, #b1b4b3, #222222, #77003d, #b1b4b3" \
-		 -kb-row-select "Tab" -kb-row-tab ""
-```
 
 
 #### Appearance
