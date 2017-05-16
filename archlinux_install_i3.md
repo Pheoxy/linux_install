@@ -578,8 +578,13 @@ Reboot to use changes:
 
 ```
 Section "Device"
-    Identifier "Radeon"
-    Driver "radeon"
+	Identifier  "Radeon"
+	Driver "radeon"
+	Option "AccelMethod" "glamor"
+        Option "DRI" "3"
+        Option "TearFree" "on"
+        Option "ColorTiling" "on"
+        Option "ColorTiling2D" "on"
 EndSection
 ```
 
@@ -684,17 +689,21 @@ cd
 
 Fonts:
 
+`sudo pacman -Sy ttf-dejavu`
+
 `sudo pacman -Sy ttf-hack`
 
 Terminal:
 
-`sudo pacman -Sy gnome-terminal`
+`sudo pacman -Sy rxvt`
 
 Startmenu:
 
 `sudo pacman -Sy d-menu`
 
+Monitor Configuration:
 
+`sudo pacman -Sy arandr`
 
 #### Appearance
 First we want to install the config software
@@ -702,5 +711,7 @@ First we want to install the config software
 `sudo pacman -Sy lxappearance qt4`
 
 Icons:
+
+`sudo pacman -Sy arc-icon-theme`
 
 `sudo pacman -Sy elementary-icon-theme`
