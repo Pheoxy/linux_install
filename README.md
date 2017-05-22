@@ -1,13 +1,11 @@
 # Linux Installs
 Here's some Documentation for all the installs I've done for some handy cheatsheats.
 
-* Home
-* [Getting Started](https://github.com/Pheoxy/linux_install/wiki/Getting-Started)
-  * Archlinux
-     * Boot
+  * [Archlinux](../blob/master/doc/archlinux.md)
+     * [Boot](../blob/master/doc/archlinux/boot.md)
        * BIOS
        * UEFI
-     * Preparation
+     * [Preparation](../blob/master/doc/archlinux/preparation.md)
        * BIOS
          * Partitioning
        * UEFI
