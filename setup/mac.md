@@ -19,3 +19,28 @@ Add to kernel blacklisting:
 Add:
 
 `blacklist i915`
+
+
+Add nouveau to the MODULES array in /etc/mkinitcpio.conf:
+
+`MODULES="... nouveau ..."`
+
+`sudo mkinitcpio -p linux`
+
+`sudo nano /etc/X11/xorg.conf.d/20-nouveau.conf`
+
+```
+Section "Device"
+    Identifier "Nvidia card"
+    Driver "nouveau"
+EndSection
+```
+
+`sudo nano /etc/X11/xorg.conf.d/10-monitor.conf`
+
+```
+Section "Monitor"
+        Identifier "eDP-1"
+        Option "PreferredMode" "1920x1080"
+EndSection
+```
