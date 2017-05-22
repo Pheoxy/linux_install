@@ -1,7 +1,7 @@
 # Linux Installs
 Here's some Documentation for all the installs I've done for some handy cheatsheats.
 
-* Archlinux
+[* Archlinux](../blob/master/doc/archlinux.md)
   * Boot
     * BIOS
     * UEFI
