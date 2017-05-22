@@ -1,17 +1,3 @@
-# Install ArchLinux using UEFI, NVIDIA and SSH for a Windows 10 Gaming KVM Enviroment
-
-### Requirements
-- Motherboard must be IOMMU Compatible and enabled
-- SSH Client (Recommended)
-- Make sure Host GPU is in Primary PCIE Slot
-
-Download Latest ArchLinux ISO:
-
-<https://www.archlinux.org/download/>
-
-If using Windows use Rufus to image the archlinux.iso with DD Image.
-
-
 ### Boot
 
 Boot from the Imaged USB in UEFI Mode and and before it can auto boot quickly use the Press the `"E"` to edit

@@ -1,10 +1,21 @@
 # Linux Installs
 Here's some Documentation for all the installs I've done for some handy cheatsheats.
 
-* Archlinux
-  * Boot
-    * BIOS
-    * UEFI
+* Home
+* [Getting Started](https://github.com/Pheoxy/linux_install/wiki/Getting-Started)
+  * Archlinux
+     * Boot
+       * BIOS
+       * UEFI
+     * Preparation
+       * BIOS
+         * Partitioning
+       * UEFI
+         * Partitioning
+     * Base Install
+       * System
+       * Boot
+     * Security
 
 ## KVM Gaming
 Just my little bit of documentation for my home KVM setup incase I need to reinstall or someone else wants to have a go.
