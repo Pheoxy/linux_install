@@ -27,6 +27,8 @@ Add nouveau to the MODULES array in /etc/mkinitcpio.conf:
 
 `sudo mkinitcpio -p linux`
 
+After install of xorg:
+
 `sudo nano /etc/X11/xorg.conf.d/20-nouveau.conf`
 
 ```
