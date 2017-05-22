@@ -1,0 +1,15 @@
+Xft.dpi: 96
+Xft.antialias: true
+Xft.rgba: rgb
+
+URxvt.letterSpace: -1
+URxvt.internalBorder: 1
+URxvt.font: ttf:Noto Sans:size=9
+URxvt.geometry: 80x20
+URxvt.depth: 32
+URxvt.background:	[100]#2f2f38
+URxvt*scrollBar:                      false
+URxvt*mouseWheelScrollPage:           false
+URxvt*cursorBlink:                    true
+URxvt*foreground: 		                #cfd2cf
+URxvt*saveLines:                      5000
